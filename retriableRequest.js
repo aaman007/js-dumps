@@ -9,6 +9,8 @@ const DEFAULT_OPTIONS = {
     backoffType: 'fixed', // [fixed, exponential]
 };
 
+const RETRIABLE_STATUS_CODES = [500, 501, 502];
+
 /**
  * Determine whether the request should be retried
  * 
@@ -19,7 +21,7 @@ const DEFAULT_OPTIONS = {
  * @returns {boolean}
  */
 const _shouldRetry = (options, statusCode) => {
-    if (!_.includes([500, 501, 502], statusCode)) {
+    if (!_.includes(RETRIABLE_STATUS_CODES, statusCode)) {
         return false;
     }
     return options.retryAttempts < options.retries;
