@@ -1,0 +1,10 @@
+{
+  "name": "js-dumps",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "apiip.net": "^1.2.1",
+    "geoip-lite": "^1.4.5"
+  }
+}
