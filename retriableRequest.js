@@ -9,7 +9,7 @@ const DEFAULT_OPTIONS = {
     backoffType: 'fixed', // [fixed, exponential]
 };
 
-const RETRIABLE_STATUS_CODES = [500, 501, 502];
+const RETRIABLE_STATUS_CODES = [500, 501, 502, 503, 504];
 
 /**
  * Determine whether the request should be retried
