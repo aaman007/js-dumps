@@ -5,6 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "apiip.net": "^1.2.1",
-    "geoip-lite": "^1.4.5"
+    "geoip-lite": "^1.4.5",
+    "lodash": "^4.17.21",
+    "request": "2.80.0"
   }
 }
