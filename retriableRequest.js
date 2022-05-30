@@ -60,7 +60,7 @@ const retriableRequest = (url, options, callback) => {
             ? callback(new Error('Could not retrieve data'))
             : undefined;
     });
-    req.on('error', (err) => callback(err));
+    req.on('error', (err) => callback ? callback(err) : undefined);
 };
 
 const run = () => {
