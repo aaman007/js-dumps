@@ -2,11 +2,13 @@
   "name": "js-dumps",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "license": "MIT",
   "dependencies": {
     "apiip.net": "^1.2.1",
     "geoip-lite": "^1.4.5",
     "lodash": "^4.17.21",
+    "node-fetch": "^3.2.6",
     "request": "2.80.0"
   }
 }
