@@ -1,15 +1,25 @@
-const request = require('request');
-const _ = require('lodash');
-const fs = require('fs');
+import request from 'request';
+import _ from 'lodash';
+import fs from 'fs';
+
+const RETRIABLE_STATUS_CODES = [500, 501, 502, 503, 504];
+
+const BACKOFF_TYPES = {
+    FIXED: 'fixed',
+    EXPONENTIAL: 'exponential',
+};
 
 const DEFAULT_OPTIONS = {
     retries: 0,
     retryAttempts: 0,
     backoff: 1,
-    backoffType: 'fixed', // [fixed, exponential]
+    backoffType: BACKOFF_TYPES.FIXED,
+    getCurrentBackoff: function () {
+        return this.backoffType === BACKOFF_TYPES.EXPONENTIAL
+            ? this.backoff * Math.pow(2, this.retryAttempts)
+            : this.backoff
+    },
 };
-
-const RETRIABLE_STATUS_CODES = [500, 501, 502, 503, 504];
 
 /**
  * Determine whether the request should be retried
@@ -36,10 +46,11 @@ const _shouldRetry = (options, statusCode) => {
  * @param {number} [options.retries]
  * @param {number} [options.backoff]
  * @param {string} [options.backoffType]
+ * @param {function} [options.getCurrentBackoff]
  * @param {function} [callback]
  */
 const retriableRequest = (url, options, callback) => {
-    options = _.extend(DEFAULT_OPTIONS, options || {});
+    options = _.extend(_.clone(DEFAULT_OPTIONS), options || {});
 
     const req = request.get(url);
     req.on('response', (response) => {
@@ -47,14 +58,11 @@ const retriableRequest = (url, options, callback) => {
             return callback ? callback(null, req, response) : undefined;
         }
         else if (_shouldRetry(options, response.statusCode)) {
-            const backoff = options.backoffType === 'exponential'
-                ? Math.pow(options.backoff, options.retryAttempts)
-                : options.backoff;
             return setTimeout(() => {
                 options.retryAttempts += 1;
                 console.log(`Retrying #${options.retryAttempts}....`);
                 return retriableRequest(url, options, callback);
-            }, backoff * 1000);
+            }, options.getCurrentBackoff());
         }
         return callback
             ? callback(new Error('Could not retrieve data'))
@@ -68,7 +76,8 @@ const run = () => {
         'https://www.w3schools.com/howto/img_forest.jpg',
         {
             retries: 5,
-            backoff: 2,
+            backoff: 64,
+            backoffType: BACKOFF_TYPES.EXPONENTIAL,
         },
         (err, req) => {
             if (err) {
