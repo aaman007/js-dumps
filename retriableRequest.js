@@ -62,7 +62,7 @@ const retriableRequest = (url, options, callback) => {
                 options.retryAttempts += 1;
                 console.log(`Retrying #${options.retryAttempts}....`);
                 return retriableRequest(url, options, callback);
-            }, options.getCurrentBackoff());
+            }, options.getCurrentBackoff() * 1000);
         }
         return callback
             ? callback(new Error('Could not retrieve data'))

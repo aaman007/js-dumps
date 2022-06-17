@@ -22,7 +22,7 @@ class Validator {
 
     constructor(data) {
         this.__validate_schemas();
-        this.__validate_data(data);
+        this.__has_validated_data = false;
         this.data = data;
     }
 
@@ -34,8 +34,9 @@ class Validator {
         }
     }
 
-    __validate_data(data) {
-        if (typeof data !== 'object') {
+    __validate_data() {
+        this.__has_validated_data = true;
+        if (this.data === null || typeof this.data !== 'object') {
             throw new ValueError('data must be an object');
         }
     }
@@ -45,6 +46,10 @@ class Validator {
     }
 
     validate() {
+        if (!this.__has_validated_data) {
+            this.__validate_data();
+        }
+
         for (let field in this.schemas) {
             const schema = this.schemas[field];
             const value = this.data[field];
@@ -62,6 +67,7 @@ class Validator {
 
     isValid({ raiseException = false }) {
         try {
+            this.__validate_data();
             this.validate();
             return true;
         }
@@ -144,8 +150,17 @@ class MyValidator extends Validator {
 // });
 // console.log(validator6.isValid({ raiseException: true }));
 
-const validator7 = new MyValidator({
-    name: 'Rahman',
-    title: 'Sir'
-});
-console.log(validator7.isValid({ raiseException: true }));
+// const validator7 = new MyValidator({
+//     name: 'Rahman',
+//     title: 'Sir'
+// });
+// console.log(validator7.isValid({ raiseException: true }));
+
+// const validator8 = new MyValidator('ABC');
+// console.log(validator8.isValid({ raiseException: true }));
+
+// const validator9 = new MyValidator(null);
+// console.log(validator9.isValid({ raiseException: true }));
+
+const validator10 = new MyValidator();
+console.log(validator10.validate());
