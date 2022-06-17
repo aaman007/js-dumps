@@ -1,6 +1,6 @@
 const deepEquals = (data1, data2) => {
-    if (data1 === null || data2 === null) return data1 === data2;
-    else if (data1 === data2) return true;
+    if (data1 === data2) return true;
+    if (data1 === null || data2 === null) return false;
     else if (typeof data1 !== 'object' || typeof data2 !== 'object') {
         const isDataOneNaN = isNaN(data1) && typeof data1 === 'number';
         const isDataTwoNaN = isNaN(data2) && typeof data2 === 'number';
