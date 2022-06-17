@@ -18,7 +18,7 @@ class Schema {
 
 
 class Validator {
-    schemas = {};
+    static schemas = {};
 
     constructor(data) {
         this.__validate_schemas();
@@ -79,7 +79,7 @@ class Validator {
 }
 
 class MyValidator extends Validator {
-    schemas = {
+    static schemas = {
         name: new Schema({
             type: 'string',
             required: true,
@@ -162,5 +162,7 @@ class MyValidator extends Validator {
 // const validator9 = new MyValidator(null);
 // console.log(validator9.isValid({ raiseException: true }));
 
-const validator10 = new MyValidator();
-console.log(validator10.validate());
+// const validator10 = new MyValidator();
+// console.log(validator10.validate());
+
+console.log(new MyValidator().schemas === new MyValidator().schemas);
