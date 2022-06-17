@@ -18,14 +18,14 @@ class Schema {
 
 
 class Validator {
-    static schemas = {};
+    schemas = {};
 
     constructor(data) {
-        this.__validate_schemas();
+        this.#validate_schemas();
         this.data = data;
     }
 
-    __validate_schemas() {
+    #validate_schemas() {
         for (let schemaName in this.schemas) {
             if (!(schemas[schemaName] instanceof Schema)) {
                 throw new SchemaError(`${schemaName} is not a valid Schema`);
@@ -33,31 +33,46 @@ class Validator {
         }
     }
 
-    __validate_data() {
+    #validate_data() {
         if (this.data === null || typeof this.data !== 'object') {
             throw new ValueError('data must be an object');
         }
     }
 
-    __getFieldValidator(field) {
+    #getFieldValidator(field) {
         return `validate${field[0].toUpperCase()}${field.slice(1)}`;
     }
 
+    #validateFieldAgainstSchema(field) {
+        const schema = this.schemas[field];
+        const value = this.data[field];
+
+        if (!schema.validate(value)) {
+            throw new ValidationError(`${value} is not a valid value for ${field}`);
+        }
+    }
+
+    #validateFieldAgainstCustomMethod(field) {
+        const value = this.data[field];
+        const validatorMethod = this.#getFieldValidator(field);
+
+        if (typeof this[validatorMethod] !== 'function') {
+            return;
+        }
+        if (!this[validatorMethod](value)) {
+            throw new ValidationError(`${value} is not a valid value for ${field}`);
+        }
+    }
+
+    #validateField(field) {
+        this.#validateFieldAgainstSchema(field);
+        this.#validateFieldAgainstCustomMethod(field);
+    }
+
     validate() {
-        this.__validate_data();
-
+        this.#validate_data();
         for (let field in this.schemas) {
-            const schema = this.schemas[field];
-            const value = this.data[field];
-            const validatorMethod = this.__getFieldValidator(field);
-            const hasValidator = typeof this[validatorMethod] === 'function';
-
-            if (!schema.validate(value)) {
-                throw new ValidationError(`${value} is not a valid value for ${field}`);
-            }
-            if (hasValidator && !this[validatorMethod](value)) {
-                throw new ValidationError(`${value} is not a valid value for ${field}`);
-            }
+            this.#validateField(field);
         }
     }
 
@@ -74,7 +89,7 @@ class Validator {
 }
 
 class MyValidator extends Validator {
-    static schemas = {
+    schemas = {
         name: new Schema({
             type: 'string',
             required: true,
@@ -95,6 +110,7 @@ class MyValidator extends Validator {
     }
 
     validateTitle(value) {
+        if (!value) return true;
         if (!['Mr.', 'Sir', 'Ms.', 'Mrs.'].includes(value)) {
             return false;
         }
@@ -102,6 +118,7 @@ class MyValidator extends Validator {
     }
 
     validateTitleV2(value) {
+        if (!value) return true;
         if (!['Mr.'].includes(value)) {
             return false;
         }
@@ -157,7 +174,5 @@ class MyValidator extends Validator {
 // const validator9 = new MyValidator(null);
 // console.log(validator9.isValid({ raiseException: true }));
 
-// const validator10 = new MyValidator();
-// console.log(validator10.validate());
-
-console.log(new MyValidator().schemas === new MyValidator().schemas);
+const validator10 = new MyValidator();
+console.log(validator10.validate());
